@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes>Latest Jar version has been used and there is no scope to fix the below vulnerabilities</notes>
+    <cve>CVE-2006-4711</cve>
+    <cve>CVE-2007-0896</cve>
+    <cve>CVE-2015-8559</cve>
+    <cve>CVE-2018-1258</cve>
+    <cve>CVE-2019-11244</cve>
+    <cve>CVE-2019-11246</cve>
+    <cve>CVE-2019-11247</cve>
+    <cve>CVE-2019-11248</cve>
+    <cve>CVE-2019-11249</cve>
+    <cve>CVE-2019-11250</cve>
+    <cve>CVE-2019-11252</cve>
+    <cve>CVE-2019-11253</cve>
+    <cve>CVE-2019-11254</cve>
+    <cve>CVE-2020-8552</cve>
+    <cve>CVE-2020-8555</cve>
+    <cve>CVE-2020-8557</cve>
+    <cve>CVE-2020-8558</cve>
+    <cve>CVE-2020-8559</cve>
+
+    <cve>CVE-2018-1002102</cve>
+    <cve>CVE-2020-8563</cve>
+    <cve>CVE-2020-25638</cve>
+    <cve>CVE-2020-13956</cve>
+    <cve>CVE-2020-17527</cve>
+
+    <cve>CVE-2021-21275</cve>
+    <cve>CVE-2020-8570</cve>
+    <cve>CVE-2021-24122</cve>
+    <cve>CVE-2021-21290</cve>
+
+    <cve>CVE-2021-22112</cve>
+    <cve>CVE-2021-25122</cve>
+    <cve>CVE-2020-9484</cve>
+    <cve>CVE-2021-25329</cve>
+    <cve>CVE-2021-21295</cve>
+    <cve>CVE-2021-21409</cve>
+    <cve>CVE-2021-20291</cve>
+    <cve>CVE-2021-22118</cve>
+    <cve>CVE-2021-22119</cve>
+    <cve>CVE-2021-33037</cve>
+    <cve>CVE-2021-30640</cve>
+    <cve>CVE-2020-36448</cve>
+    <cve>CVE-2020-36460</cve>
+    <cve>CVE-2021-28170</cve>
+
+    <cve>CVE-2021-41079</cve>
+    <cve>CVE-2021-28170</cve>
+    <cve>CVE-2020-36460</cve>
+    <cve>CVE-2020-36448</cve>
+    <cve>CVE-2021-41079</cve>
+
+    <cve>CVE-2021-42340</cve>
+    <cve>CVE-2021-25738</cve>
+  </suppress>
+</suppressions>
+
