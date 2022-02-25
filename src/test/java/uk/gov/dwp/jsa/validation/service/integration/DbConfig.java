@@ -36,7 +36,7 @@ public class DbConfig {
     }
 
     /**
-     * @param localContainerEntityManagerFactoryBean
+     * @param localContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean
      * @return the JPA transaction manager
      */
     @Bean

@@ -1,8 +1,9 @@
 package uk.gov.dwp.jsa.validation.service.repositories;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.dwp.jsa.adaptors.dto.claim.AgentPerformance;
 import uk.gov.dwp.jsa.adaptors.dto.claim.AgentPerformances;
@@ -15,13 +16,15 @@ import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+
+@RunWith(MockitoJUnitRunner.class)
 public class ClaimStatisticsRepositoryTest {
     private static final LocalDate startDate = LocalDate.now();
     private static final LocalDate endDate = startDate.plusDays(3);
@@ -49,21 +52,21 @@ public class ClaimStatisticsRepositoryTest {
     @Mock
     Query query;
 
+    @Mock
+    private BookingStatusRepository mockBookingStatusRepository;
+
     ClaimStatisticsRepository claimStatisticsRepository;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     private ClaimStatisticsRepository createRepo(EntityManagerFactory entityManagerFactory) {
-        ClaimStatisticsRepository claimStatisticsRepository = new ClaimStatisticsRepository(entityManagerFactory);
+        ClaimStatisticsRepository claimStatisticsRepository = new ClaimStatisticsRepository(entityManagerFactory,
+                mockBookingStatusRepository);
         ReflectionTestUtils.setField(claimStatisticsRepository, "dbSchema", "validation_schema");
         return claimStatisticsRepository;
     }
 
     @Test
-    public void getAllClaimStatistics() {
+    public void getClaimStatistics() {
 
         int typedCount = 3;
         double typedPercentage = 3d;
@@ -71,6 +74,7 @@ public class ClaimStatisticsRepositoryTest {
         Object percentage = typedPercentage;
         LocalDateTime typedOldest = LocalDateTime.parse("2019-05-03T10:11:10");
         Object oldest = Timestamp.valueOf(typedOldest);
+        final int expectedAssistedDigitalClaimCount = 5;
 
         Object result = new Object[] { count, count, oldest, count, percentage, percentage, count, percentage, percentage, count, count };
         List<Object> resultList = new ArrayList<Object>() {{ add(result); }};
@@ -78,11 +82,15 @@ public class ClaimStatisticsRepositoryTest {
         when(query.getResultList()).thenReturn(resultList);
         when(entityManagerFactory.createEntityManager()).thenReturn(entityManager);
         when(entityManager.createNativeQuery(allStats)).thenReturn(query);
+        when(mockBookingStatusRepository.getAssistedDigitalClaimCount(
+                LocalDateTime.of(startDate, LocalTime.MIN),
+                LocalDateTime.of(startDate, LocalTime.MAX)
+        )).thenReturn(expectedAssistedDigitalClaimCount);
 
         claimStatisticsRepository = createRepo(entityManagerFactory);
         ClaimStatistics actual = claimStatisticsRepository.getAllClaimStatistics(startDate);
         ClaimStatistics expected = new ClaimStatistics(
-            typedCount, typedCount, typedOldest, typedCount, typedPercentage, typedPercentage, typedCount, typedPercentage, typedPercentage, typedCount, typedCount
+            typedCount, typedCount, typedOldest, typedCount, typedPercentage, typedPercentage, typedCount, typedPercentage, typedPercentage, typedCount, typedCount, expectedAssistedDigitalClaimCount
         );
 
         assert(expected.getCasesReceivedInDay() == actual.getCasesReceivedInDay());
@@ -96,10 +104,11 @@ public class ClaimStatisticsRepositoryTest {
         assert(expected.getPercentageOfClaimsInWeekClosedIn48hr() == actual.getPercentageOfClaimsInWeekClosedIn48hr());
         assert(expected.getCasesOutstandingOutside24hrKpi() == actual.getCasesOutstandingOutside24hrKpi());
         assert(expected.getCasesOutstandingOutside48hrKpi() == actual.getCasesOutstandingOutside48hrKpi());
+        assert(expected.getAssistedDigitalClaimCount() == actual.getAssistedDigitalClaimCount());
     }
 
     @Test
-    public void getAllClaimStatisticsNoneExist() {
+    public void getClaimStatisticsNoneExist() {
         List<Object> resultList = new ArrayList<Object>() {};
 
         when(query.getResultList()).thenReturn(resultList);
@@ -109,7 +118,7 @@ public class ClaimStatisticsRepositoryTest {
         claimStatisticsRepository = createRepo(entityManagerFactory);
         ClaimStatistics actual = claimStatisticsRepository.getAllClaimStatistics(startDate);
         ClaimStatistics expected = new ClaimStatistics(
-                0, 0, null, 0, 0d, 0d, 0, 0d, 0d, 0, 0
+                0, 0, null, 0, 0d, 0d, 0, 0d, 0d, 0, 0, 0
         );
 
         assert(expected.getCasesReceivedInDay() == actual.getCasesReceivedInDay());
@@ -123,6 +132,7 @@ public class ClaimStatisticsRepositoryTest {
         assert(expected.getPercentageOfClaimsInWeekClosedIn48hr() == actual.getPercentageOfClaimsInWeekClosedIn48hr());
         assert(expected.getCasesOutstandingOutside24hrKpi() == actual.getCasesOutstandingOutside24hrKpi());
         assert(expected.getCasesOutstandingOutside48hrKpi() == actual.getCasesOutstandingOutside48hrKpi());
+        assert(expected.getAssistedDigitalClaimCount() == actual.getAssistedDigitalClaimCount());
     }
 
     @Test

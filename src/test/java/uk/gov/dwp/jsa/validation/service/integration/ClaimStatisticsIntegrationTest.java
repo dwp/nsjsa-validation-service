@@ -23,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.dwp.jsa.adaptors.dto.claim.ClaimStatistics;
+import uk.gov.dwp.jsa.validation.service.repositories.BookingStatusRepository;
 import uk.gov.dwp.jsa.validation.service.repositories.ClaimStatisticsRepository;
 
 import javax.persistence.EntityManagerFactory;
@@ -66,6 +67,9 @@ public class ClaimStatisticsIntegrationTest {
     @Autowired
     EntityManagerFactory entityManagerFactory;
 
+    @Autowired
+    private BookingStatusRepository bookingStatusRepository;
+
     ClaimStatisticsRepository claimStatisticsRepository;
     static ClaimStatistics claimStatistics;
 
@@ -78,7 +82,7 @@ public class ClaimStatisticsIntegrationTest {
                 ScriptUtils.executeSqlScript(conn, new ClassPathResource("data/TestData.sql"));
             }
             // Also the context of 'before all' wouldn't allow the below to work, so we simulate it
-            claimStatisticsRepository = new ClaimStatisticsRepository(entityManagerFactory);
+            claimStatisticsRepository = new ClaimStatisticsRepository(entityManagerFactory, bookingStatusRepository);
             int dayOffset = LocalDate.now().getDayOfWeek().getValue() - 1;
             LocalDate mondayDate = LocalDate.now().minusDays(dayOffset);
             claimStatistics = claimStatisticsRepository.getAllClaimStatistics(mondayDate);

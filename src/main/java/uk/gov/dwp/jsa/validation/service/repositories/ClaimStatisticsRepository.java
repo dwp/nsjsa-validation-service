@@ -1,5 +1,7 @@
 package uk.gov.dwp.jsa.validation.service.repositories;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +24,7 @@ import static java.lang.String.format;
 public class ClaimStatisticsRepository {
 
     private final EntityManagerFactory emf;
+    private final BookingStatusRepository bookingStatusRepository;
 
     private static final int SIZE = 11;
     private static final int DAILY_TOTAL = 0;
@@ -39,12 +44,16 @@ public class ClaimStatisticsRepository {
     private static final int WITHDRAWN = 3;
     private static final int TOTAL = 4;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClaimStatisticsRepository.class);
+
     @Value("${validation.db.schema:validation_schema}")
     private String dbSchema;
 
     @Autowired
-    public ClaimStatisticsRepository(final EntityManagerFactory entityManagerFactory) {
+    public ClaimStatisticsRepository(final EntityManagerFactory entityManagerFactory,
+                                     final BookingStatusRepository bookingStatusRepository) {
         this.emf = entityManagerFactory;
+        this.bookingStatusRepository = bookingStatusRepository;
     }
 
     private Object querySingleResult(final String sql) {
@@ -72,6 +81,13 @@ public class ClaimStatisticsRepository {
         }
     }
 
+    /**
+     * Gets the claim statistics from the validation service database using a stored procedure.
+     *
+     * @param date date to get the statistics for
+     *
+     * @return claim statistics from the validation service database, excluding assisted digital claim count
+     */
     public ClaimStatistics getAllClaimStatistics(final LocalDate date) {
         String allStatsFormat = "SELECT%n"
                 + "\tdaily_total,%n"
@@ -89,8 +105,15 @@ public class ClaimStatisticsRepository {
 
         String allStats = format(allStatsFormat, date);
 
+        LOGGER.debug("Calling stored procedure to get claim statistics");
         Object results = querySingleResult(allStats);
         Object[] counts = (Object[]) results;
+
+        LOGGER.debug("Calling repository to get assisted digital claim count");
+        final int assistedDigitalClaimCount = bookingStatusRepository.getAssistedDigitalClaimCount(
+                LocalDateTime.of(date, LocalTime.MIN),
+                LocalDateTime.of(date, LocalTime.MAX)
+        );
 
         return new ClaimStatistics(
                 counts[DAILY_TOTAL] != null ? (Integer) counts[DAILY_TOTAL] : 0,
@@ -103,7 +126,8 @@ public class ClaimStatisticsRepository {
                 counts[WTD_CLOSED_24HR] != null ? (Double) counts[WTD_CLOSED_24HR] : 0,
                 counts[WTD_CLOSED_48HR] != null ? (Double) counts[WTD_CLOSED_48HR] : 0,
                 counts[OUTSIDE_24HR] != null ? (Integer) counts[OUTSIDE_24HR] : 0,
-                counts[OUTSIDE_48HR] != null ? (Integer) counts[OUTSIDE_48HR] : 0
+                counts[OUTSIDE_48HR] != null ? (Integer) counts[OUTSIDE_48HR] : 0,
+                assistedDigitalClaimCount
         );
     }
 

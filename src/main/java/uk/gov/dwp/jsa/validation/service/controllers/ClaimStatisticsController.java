@@ -45,7 +45,7 @@ public class ClaimStatisticsController {
             final HttpServletRequest request
     ) {
         LOGGER.debug("Getting claim statistics for {}", date);
-        final ClaimStatistics claimStatistics = claimStatisticsService.getClaimStatistics(date);
+        final ClaimStatistics claimStatistics = claimStatisticsService.getAllClaimStatistics(date);
         return responseFactory.create(
                 request.getRequestURI(),
                 claimStatistics

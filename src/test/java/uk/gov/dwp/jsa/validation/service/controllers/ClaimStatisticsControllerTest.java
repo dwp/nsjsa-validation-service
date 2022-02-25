@@ -72,7 +72,7 @@ public class ClaimStatisticsControllerTest {
     }
 
     private void withClaimStatisticsMocked() {
-        when(claimStatisticsService.getClaimStatistics(today)).thenReturn(CLAIM_STATISTICS);
+        when(claimStatisticsService.getAllClaimStatistics(today)).thenReturn(CLAIM_STATISTICS);
         when(request.getRequestURI()).thenReturn(PATH);
         when(responseFactory.create(PATH, CLAIM_STATISTICS)).thenReturn(RESPONSE_ENTITY);
     }
